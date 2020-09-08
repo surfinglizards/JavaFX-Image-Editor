@@ -20,11 +20,7 @@ import java.util.ArrayList;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
-  
-        primaryStage.setScene(new Scene(new VBox(imageView), 1920, 1080));
-        primaryStage.show();
-
+    public void start(Stage primaryStage) throws Exception {
         new Controller(primaryStage);
     }
 
