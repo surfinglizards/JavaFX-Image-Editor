@@ -44,7 +44,7 @@ public class Controller {
     private CheckBox reduceCheckBox = new CheckBox("Down Scale:");
     private CheckBox enhanceCheckBox = new CheckBox("Up Scale");
 
-    private Image image = test(new Image("file:E:\\Downloads\\2d392974003a38b99101eb54a826cba46be22392.jpg"));//= new Image("file:./fox.jpg");
+    private Image image = new Image(""));// Default image goes here
 
     private ImageView imageView = new ImageView(image);
 
@@ -154,14 +154,12 @@ public class Controller {
         enhanceSlider.setMin(1);
         enhanceSlider.setShowTickMarks(true);
         enhanceSlider.setShowTickLabels(true);
-//        enhanceSlider.setBlockIncrement(1);
         enhanceSlider.setMajorTickUnit(1);
-        enhanceSlider.setOnMousePressed(event -> System.out.println(enhanceSlider.getValue()));
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                update();
+                //update(); //debug
             }
         };
         timer.start();
@@ -176,8 +174,8 @@ public class Controller {
         long freeMemory = operatingSystemMXBean.getFreePhysicalMemorySize();
         long usedMemory = totalMemory - freeMemory;
         long percentUsed = totalMemory / freeMemory;
-        memoryLabel.setText("Memory:\nTotal: " + bytesToMegabytes(totalMemory)  + "KB Free: " + bytesToMegabytes(freeMemory) +
-                "KB Used: " + bytesToMegabytes(usedMemory) + "KB Usage: " + percentUsed + "%");
+        memoryLabel.setText("Memory:\nTotal: " + bytesToKB(totalMemory)  + "KB Free: " + bytesToKB(freeMemory) +
+                "KB Used: " + bytesToKB(usedMemory) + "KB Usage: " + percentUsed + "%");
 
         String vmCPUsage = String.format ("%.2f", operatingSystemMXBean.getProcessCpuLoad() * 100);
         String systemCPUsage = String.format ("%.2f", operatingSystemMXBean.getSystemCpuLoad() * 100);
@@ -185,7 +183,7 @@ public class Controller {
         processorLabel.setText("CPU Usage: VM: " + vmCPUsage + "% System: " + systemCPUsage + "%");
     }
 
-    public long bytesToMegabytes(long bytes) {
+    public long bytesToKB(long bytes) { // KB conversion
         final long MEGABYTE = 1024L;
         return bytes / MEGABYTE;
     }
@@ -257,6 +255,8 @@ public class Controller {
 
     private double scrollSpeed = 50;
 
+    //buggy mouse control
+    
     private void ScrollWheelControl(ScrollEvent event){
         if (event.getDeltaY() == 40){
                 imageView.setFitWidth(imageView.getFitWidth() + scrollSpeed);
@@ -270,22 +270,23 @@ public class Controller {
             }
     }
 
+    // I'm still working mo camra controls
 
     private void buttonControl(KeyEvent event){
         switch (event.getCode()){
-            case W:
+            case W: // moves the image up
                 imageView.setY(imageView.getY() + 10);
                 break;
-            case A:
+            case A: // moves the image left
                 imageView.setX(imageView.getX() + 10);
                 break;
-            case S:
+            case S: // moves the image down
                 imageView.setY(imageView.getY() - 10);
                 break;
-            case D:
+            case D: // moves the image right
                 imageView.setX(imageView.getX() - 10);
                 break;
-            case F:
+            case F: // sets program to fullscreen
                 if (event.isControlDown())
                 stage.setFullScreen(!stage.isFullScreen());
                 break;
@@ -301,8 +302,7 @@ public class Controller {
 
     }
 
-
-
+    // noise generator
 
     private Image applyNoise(Image source, double noiseValue){
         PixelReader pixelReader = source.getPixelReader();
@@ -320,12 +320,12 @@ public class Controller {
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                Color color = pixelReader.getColor(x, y);
+                Color color = pixelReader.getColor(x, y); // captures each color per pixel
 
-                double noise = Math.random() / noiseValue;
+                double noise = Math.random() / noiseValue; // noise calculation
 
                 Color newColor = new Color(Math.min(color.getRed() + noise, 1), Math.min(color.getGreen() + noise, 1),
-                        Math.min(color.getGreen() + noise, 1) , 1);
+                        Math.min(color.getGreen() + noise, 1) , 1); // applies noise
 
                 pixelWriter.setColor(x,y, newColor);
             }
@@ -336,6 +336,7 @@ public class Controller {
 
     private int counter = 0;
 
+    //combines 2 or more images. It works best with images with the same resolution
 
     private Image combineImages(Image...images){
         int maxX = 0;
@@ -380,6 +381,9 @@ public class Controller {
         counter = 0;
         return image;
     }
+    
+    
+    //combines 2 or more images from an arraylist. It works best with images with the same resolution
 
     private Image combineImages(ArrayList<Image> images){
         int maxX = 0;
@@ -425,6 +429,9 @@ public class Controller {
         return image;
     }
 
+    
+    //reduces the resoution
+    
     private Image reduceImage(Image image, int by){
 
         int xVar = (int) image.getWidth();
@@ -507,91 +514,6 @@ public class Controller {
 
         }
 
-        return writableImage;
-    }
-
-    private Image rescale(Image image, int newW, int newH){
-
-        int w = (int) image.getWidth();
-        int h = (int) image.getHeight();
-
-        WritableImage writableImage = new WritableImage(newW - 1, newH - 1 );
-        PixelWriter writer = writableImage.getPixelWriter();
-        PixelReader reader = image.getPixelReader();
-
-        if ( w > newW && h > newH ){
-            double tempVar = (double) newW / w;
-            for (int x = 0; x < h; x++) {
-                for (int y = 0; y < w; y++) {
-                    Color color = null;
-                    if (x != 0 && y != 0)
-                        color = reader.getColor((int) (x / tempVar), (int) (y / tempVar));
-                    else
-                        color = reader.getColor(x, y);
-                    for (int x1 = 0; x1 < newW; x1++) {
-                        for (int y1 = 0; y1 < newH; y1++) {
-                            writer.setColor(x1, y1, color);
-                        }
-                    }
-                    writer.setColor(x,y,color);
-
-                }
-            }
-        }
-
-        return writableImage;
-    }
-
-    private Image test(Image image2) {
-
-        Image image = new Image("file:E:\\Downloads\\fd05e0cf5bef5b0c18e907a7bf53cd88.jpeg");
-
-        Image result = image2;
-
-        System.out.println("Width: " + result.getWidth() + " Height: " + result.getHeight());
-//        while (image.getHeight() / 4 < result.getHeight() && image.getWidth() / 4 < result.getWidth()) {
-//            result = reduceImage(result, 2);
-//            System.out.println("Width: " + result.getWidth() + " Height: " + result.getHeight());
-//        }
-        System.out.println("Width: " + result.getWidth() + " Height: " + result.getHeight());
-
-        int w = (int) image.getWidth();
-        int h = (int) image.getHeight();
-
-        WritableImage writableImage = new WritableImage(w, h);
-
-
-        PixelReader reader = writableImage.getPixelReader();
-        PixelReader readerAlt = image2.getPixelReader();
-
-        PixelWriter writer = writableImage.getPixelWriter();
-
-
-//        for (int x = 0; x < result.getWidth(); x++) {
-//            for (int y = 0; y < result.getHeight(); y++) {
-//                int x1 = x + 1;
-//                int y1 = y + 1;
-//
-//                Color color = reader.getColor(x, y);
-//
-//                writer.setColor(x1, y1, color);
-//
-//            }
-//        }
-
-
-        for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                Color color;
-                if (x > w / 4 && y > h / 4) {
-                    color = readerAlt.getColor(x, y);
-                } else {
-                    color = reader.getColor(x, y);
-                }
-
-                writer.setColor(x,y, color);
-            }
-        }
         return writableImage;
     }
 
