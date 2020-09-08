@@ -52,7 +52,7 @@ public class Controller {
     private Label processorLabel = new Label();
 
     private BorderPane root = new BorderPane();
-    private Pane centerPane = new Pane();
+    private ScrollPane centerPane = new ScrollPane(imageView);
     private GridPane bottomPane = new GridPane();
     private HBox topPane = new HBox();
 
@@ -83,35 +83,21 @@ public class Controller {
         root.setBottom(bottomPane);
         root.setTop(menuBar);
         root.setOnKeyPressed(this::buttonControl);
-        root.setOnScroll(this::ScrollWheelControl);
 
         stage.setScene(scene);
         stage.show();
         stage.setTitle("Image Editor");
         stage.setMinWidth(800);
         stage.setMinHeight(600);
+        stage.addEventHandler(ScrollEvent.SCROLL, this::ScrollWheelControl);
 
         applyButton.setOnAction(this::apply);
         applyButton.toFront();
-
-        centerPane.getChildren().add(imageView);
-
+        
+        
         imageView.setPreserveRatio(true);
         imageView.setFitWidth( scene.getWidth() / 2 );
         imageView.autosize();
-        centerPane.setOnMouseClicked(event -> {
-            double initX = event.getX();
-            double initY = event.getY();
-            centerPane.setOnMouseDragged(event1 -> {
-                double x = event1.getX();
-                double y = event1.getY();
-                if (initX > x){
-                    imageView.setX(imageView.getX() - 2);
-                } else {
-                    imageView.setX(imageView.getX() + 2);
-                }
-            });
-        });
 
         bottomPane.add(noiseCheckBox, 0, 0);
         bottomPane.add(noiseSlider, 1,0);
