@@ -169,6 +169,8 @@ public class Controller {
     private final Runtime runtime = Runtime.getRuntime();
     private final OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
+    
+    //debug
     private void update(){
         long totalMemory = operatingSystemMXBean.getTotalPhysicalMemorySize();
         long freeMemory = operatingSystemMXBean.getFreePhysicalMemorySize();
@@ -437,7 +439,7 @@ public class Controller {
         int xVar = (int) image.getWidth();
         int yVar = (int) image.getHeight();
 
-        WritableImage writableImage = new WritableImage(xVar, yVar);
+        WritableImage writableImage = new WritableImage((xVar / by) + 1, (yVar / by) + 1);
 
         PixelReader pixelReader = image.getPixelReader();
         PixelWriter writer = writableImage.getPixelWriter();
